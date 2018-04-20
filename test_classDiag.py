@@ -1,30 +1,28 @@
 import unittest
 import classDiag as sut
 
-@unittest.skip
+##@unittest.skip
 class ClassMatchingTest(unittest.TestCase):
-    def test_SimpleOne(self):
-        fileText = '''
-class Foo
-{
-   blabla
-};
-'''
+    def test_NoParent(self):
+        fileText='class Foo\n{   blabla\n};'
         classes = sut.getClassDefinitions(fileText)
         self.assertEqual(len(classes), 1)
         self.assertEqual(classes[0].name, 'Foo')
         self.assertEqual(classes[0].parents, '')
+
     def test_SimpleParent(self):
-        fileText = '''
-class Foo : public Bar
-{
-   blabla
-};
-'''
+        fileText = 'class Foo : public Bar\n{\n   blabla\n};'
         classes = sut.getClassDefinitions(fileText)
         self.assertEqual(len(classes), 1)
         self.assertEqual(classes[0].name, 'Foo')
         self.assertEqual(classes[0].parents, 'public Bar')
+
+    def test_FunnyParent(self):
+        fileText = 'class Foo : public Bar\n, std::iterator<std::forward_iterator_tag,\n boost::shared_ptr<std::string> >::Bar<Zoo::Paz>\n{\n   blabla\n};'
+        classes = sut.getClassDefinitions(fileText)
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(classes[0].name, 'Foo')
+        self.assertEqual(classes[0].parents, 'public Bar, std::iterator<std::forward_iterator_tag, boost::shared_ptr<std::string> >::Bar<Zoo::Paz>')
 
 class ParentExtractionTest(unittest.TestCase):
     def test_SimpleOne(self):
@@ -107,4 +105,4 @@ class ParentExtractionTest(unittest.TestCase):
         self.assertEqual(parents[1].qualifiedType, 'std::iterator<std::forward_iterator_tag, boost::shared_ptr<std::string> >::Bar<Zoo::Paz>')
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

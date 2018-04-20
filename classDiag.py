@@ -48,13 +48,12 @@ def findFilesWithClasses(paths):
     return filesWithClass
 
 
-def getClassDefinitionsInFiles(files):
+def getClassesFromFiles(files):
     class ClassData:
         def __init__(self, name, file, parents):
             self.name = name
             self.file = file
             self.parents = parents
-    #assumes files contains a class
     classes = []
 
     for file in files:
@@ -66,14 +65,14 @@ def getClassDefinitionsInFiles(files):
                                          extractParents(classDefinition.parents)))
     return classes
 
-re_class=re.compile(r'class\s+(\w+)\s*(:\s*([\w:,<>\s]+))*{')
+re_class=re.compile(r'class\s+(\w+)\s*(:([\w\s:<>,]+))?{',re.MULTILINE)
 def getClassDefinitions(fileText):
     class ClassDefinitionData:
-        def __init__(self, name, parents):
+        def __init__(self, name, parents=None):
             self.name = name
             self.parents = parents
-    matches = re_class.findall(fileText,re.MULTILINE)
-    return [ClassDefinitionData(match[0],match[2]) for match in matches]
+    matches = re_class.findall(fileText)
+    return [ClassDefinitionData(match[0].strip(),match[2].replace('\n','').strip()) for match in matches]
 
 re_parentDef= re.compile(r'((public|protected|private)\s+)?(([\w:]+(<.*>)?)+)')
 def extractParents(parentsMatch):
@@ -92,7 +91,7 @@ def extractParents(parentsMatch):
     return parents
 
 
-def createClassDiagram(classes):
+def createClassDiagram(classes, file):
     def createNodeFromClass(clas):
         node = gw.Node(clas.name)
         node.label = clas.name+'\n@'+clas.file
@@ -116,7 +115,7 @@ def createClassDiagram(classes):
     nodes = {clas.name:createNodeFromClass(clas) for clas in classes}
     for node in nodes.values():
         connectNodes(node, nodes)
-    gw.NodeL2File(nodes.values(), '/home/scifuent/public/classes.gml')
+    gw.NodeL2File(nodes.values(), file)
     
     
     
@@ -126,8 +125,8 @@ def createClassDiagram(classes):
 
 if __name__ == '__main__':
     filesWithClass = findFilesWithClasses('.')
-    classes = getClassDefinitionsInFiles(filesWithClass)
-    createClassDiagram(classes)
+    classes = getClassesFromFiles(filesWithClass)
+    createClassDiagram(classes, '/home/scifuent/public/classes.gml')
     
     
     for clas in classes:
