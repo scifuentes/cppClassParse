@@ -56,9 +56,28 @@ class Foo : public Bar<T::C>
         self.assertEqual(s0.key,'class')
         self.assertEqual(s0.name,'Foo : public Bar<T::C>')
         self.assertEqual(len(s0.childs),2)
-        s1=scopes[1]
-        self.assertEqual(s1.key,'')
-        self.assertEqual(s1.name,'')
+
+    def test_otherScopes(self):
+        text='''
+class Foo : public Bar<T::P> 
+{  
+    double a;  
+    void foo()
+    { int blabla;  
+      bar(); 
+      if(blabla){popo;} 
+      for(i =0;;){puf();}
+    } 
+};
+'''
+        scopes = sut.textToScopes(text)
+
+        self.assertEqual(len(scopes),4)
+        self.assertEqual(scopes[0].key,'class')
+        self.assertEqual(scopes[1].key,'foo')
+        self.assertEqual(scopes[2].key,'if')
+        self.assertEqual(scopes[3].key,'for')
+
 
 
 if __name__ == '__main__':
