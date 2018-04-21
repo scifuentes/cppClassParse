@@ -1,7 +1,6 @@
 import unittest
 import classDiag as sut
 
-##@unittest.skip
 class ClassMatchingTest(unittest.TestCase):
     def test_NoParent(self):
         fileText='class Foo\n{   blabla\n};'
